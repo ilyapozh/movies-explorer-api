@@ -1,0 +1,32 @@
+{
+  "name": "movies-explorer-api",
+  "version": "1.0.0",
+  "description": "Project",
+  "main": "app.js",
+  "dependencies": {
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.23.4",
+    "express": "^4.17.1",
+    "nodemon": "^2.0.7"
+  },
+  "devDependencies": {
+    "eslint": "^7.27.0",
+    "eslint-plugin-react": "^7.24.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "npx eslint .",
+    "dev": "nodemon app.js",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ilyapozh/movies-explorer-api.git"
+  },
+  "author": "Ilya Pojidaev",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ilyapozh/movies-explorer-api/issues"
+  },
+  "homepage": "https://github.com/ilyapozh/movies-explorer-api#readme"
+}
