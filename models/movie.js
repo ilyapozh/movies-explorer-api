@@ -26,7 +26,7 @@ const movieSchema = mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator: (v) => validator.isUrl(v),
+      validator: (v) => validator.isURL(v),
       message: 'Поле image должно быть Url',
     },
   },
@@ -34,7 +34,7 @@ const movieSchema = mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator: (v) => validator.isUrl(v),
+      validator: (v) => validator.isURL(v),
       message: 'Поле trailer должно быть Url',
     },
   },
@@ -42,7 +42,7 @@ const movieSchema = mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator: (v) => validator.isUrl(v),
+      validator: (v) => validator.isURL(v),
       message: 'Поле thumbnail должно быть Url',
     },
   },
@@ -52,7 +52,9 @@ const movieSchema = mongoose.Schema({
     required: true,
   },
   movieId: {
+    type: Number,
     required: true,
+    unique: true,
   },
   nameRU: {
     type: String,
@@ -63,3 +65,19 @@ const movieSchema = mongoose.Schema({
     required: true,
   },
 });
+
+movieSchema.statics.checkMovieOwner = function (loggedUserId, moovieId) {
+  return this.findById(moovieId)
+    .then((movie) => {
+      if (!movie) {
+        return Promise.reject(new Error('NotFound'));
+      }
+      if (loggedUserId === String(movie.owner)) {
+        return this.findByIdAndRemove(String(moovieId))
+          .then(() => console.log('delete complete'));
+      }
+      return Promise.reject(new Error('NoRights'));
+    });
+};
+
+module.exports = mongoose.model('movie', movieSchema);
