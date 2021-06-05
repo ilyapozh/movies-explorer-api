@@ -10,7 +10,8 @@
     "no-underscore-dangle": ["error", {"allow": ["_id"]}],
     "linebreak-style": 0,
     "no-unused-vars": 0,
-    "no-useless-escape": "warn"
+    "no-useless-escape": "warn",
+    "no-param-reassign":"off",
 
   }
 }

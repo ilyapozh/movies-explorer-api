@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 const ValidationError = require('../middlewears/errors/validationError');
 const MongoError = require('../middlewears/errors/MongoError');
 const NotFoundError = require('../middlewears/errors/notFoundError');
-const CastError = require('../middlewears/errors/castError');
 const User = require('../models/user');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
@@ -22,6 +21,7 @@ const createUser = (req, res, next) => {
         name, email, password,
       })
         .then((user) => {
+          user.password = undefined;
           res.send({ data: user });
         })
         .catch((err) => {
