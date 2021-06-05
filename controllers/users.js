@@ -48,6 +48,7 @@ const login = (req, res, next) => {
         NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
         { expiresIn: '7d' },
       );
+      user.password = undefined;
       res.send({ user, token });
     })
     .catch(next);
@@ -56,6 +57,7 @@ const login = (req, res, next) => {
 const getUserInfo = (req, res, next) => {
   User.getCurrentUserInfo(req.user._id)
     .then((user) => {
+      user.password = undefined;
       res.send({ user });
     })
     .catch(next);
