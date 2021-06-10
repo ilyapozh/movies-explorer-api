@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const NoRightsError = require('../middlewears/errors/noRightsError');
+const NotFoundError = require('../middlewears/errors/notFoundError');
 
 const movieSchema = mongoose.Schema({
   country: {
@@ -11,7 +13,7 @@ const movieSchema = mongoose.Schema({
     required: true,
   },
   duration: {
-    type: String,
+    type: Number,
     required: true,
   },
   year: {
@@ -54,29 +56,32 @@ const movieSchema = mongoose.Schema({
   movieId: {
     type: Number,
     required: true,
-    unique: true,
   },
   nameRU: {
     type: String,
     required: true,
   },
-  nameEn: {
+  nameEN: {
     type: String,
     required: true,
   },
 });
 
-movieSchema.statics.checkMovieOwner = function (loggedUserId, moovieId) {
-  return this.findById(moovieId)
+movieSchema.statics.checkMovieOwnerAndDelete = function (loggedUserId, movieId) {
+  return this.findById(movieId)
     .then((movie) => {
       if (!movie) {
-        return Promise.reject(new Error('NotFound'));
+        return Promise.reject(new NotFoundError('Карточка не найдена'));
       }
       if (loggedUserId === String(movie.owner)) {
-        return this.findByIdAndRemove(String(moovieId))
-          .then(() => console.log('delete complete'));
+        return this.findByIdAndRemove(String(movieId))
+          .then((deletedMovie) => {
+            const curMovie = deletedMovie;
+            curMovie.owner = undefined;
+            return curMovie;
+          });
       }
-      return Promise.reject(new Error('NoRights'));
+      return Promise.reject(new NoRightsError('У вас нет прав на удаление этой карточки'));
     });
 };
 

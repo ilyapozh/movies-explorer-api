@@ -21,14 +21,15 @@ const createUser = (req, res, next) => {
         name, email, password,
       })
         .then((user) => {
-          user.password = undefined;
-          res.send({ data: user });
+          const currentUserInfo = user;
+          currentUserInfo.password = undefined;
+          res.send({ data: currentUserInfo });
         })
         .catch((err) => {
           if (err.name === 'ValidationError') {
             throw new ValidationError(`В отправленных данных есть ошибка ${err.message}`);
           }
-          if (err.code === 11000) {
+          if (err.code === 11000 && err.name === 'MongoError') {
             throw new MongoError('Пользователь с таким имейлом уже существует');
           } else {
             next(err);
@@ -48,8 +49,9 @@ const login = (req, res, next) => {
         NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
         { expiresIn: '7d' },
       );
-      user.password = undefined;
-      res.send({ user, token });
+      const currentUserInfo = user;
+      currentUserInfo.password = undefined;
+      res.send({ token });
     })
     .catch(next);
 };
@@ -57,8 +59,9 @@ const login = (req, res, next) => {
 const getUserInfo = (req, res, next) => {
   User.getCurrentUserInfo(req.user._id)
     .then((user) => {
-      user.password = undefined;
-      res.send({ user });
+      const currentUserInfo = user;
+      currentUserInfo.password = undefined;
+      res.send({ currentUserInfo });
     })
     .catch(next);
 };
@@ -77,6 +80,8 @@ const updateUserInfo = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new ValidationError(`В отправленных данных есть ошибка ${err.message}`));
+      } if (err.code === 11000 && err.name === 'MongoError') {
+        next(new MongoError('Пользователь с таким имейлом уже существует'));
       } else {
         next(err);
       }

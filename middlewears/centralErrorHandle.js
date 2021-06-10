@@ -7,6 +7,8 @@ function centralErrorHandle(err, req, res, next) {
         ? 'На сервере произошла ошибка'
         : message,
     });
+
+  next();
 }
 
 module.exports = {

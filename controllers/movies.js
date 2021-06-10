@@ -1,17 +1,21 @@
 const Movie = require('../models/movie');
 const ValidationError = require('../middlewears/errors/validationError');
-const MongoError = require('../middlewears/errors/MongoError');
-const NotFoundError = require('../middlewears/errors/notFoundError');
 const CastError = require('../middlewears/errors/castError');
-const NoRightsError = require('../middlewears/errors/noRightsError');
+const ConflictError = require('../middlewears/errors/conflictError');
 
 const findAllMovies = (req, res, next) => {
-  Movie.find({}) // add populate('owner') to work
+  const owner = req.user._id;
+  Movie.find({ owner: `${owner}` })
     .then((movies) => {
-      // if (movies.length === 0) {
-      //   throw new NotFoundError('Карточки не найдены');
-      // } !!! Should there be a special response for no-movies case ???
-      res.send({ data: movies });
+      let catalogMovies = [];
+      if (movies.length !== 0) {
+        catalogMovies = movies.map((movie) => {
+          const curMovie = movie;
+          curMovie.owner = undefined;
+          return curMovie;
+        });
+      }
+      res.send({ data: catalogMovies });
     })
     .catch((err) => next(err))
     .catch(next);
@@ -21,56 +25,57 @@ const createMovie = (req, res, next) => {
   const owner = req.user._id;
   const {
     country, director, duration, year, description, image,
-    trailer, thumbnail, movieId, nameRU, nameEn,
+    trailer, thumbnail, movieId, nameRU, nameEN,
   } = req.body;
 
-  Movie.create({
-    country,
-    director,
-    duration,
-    year,
-    description,
-    image,
-    trailer,
-    thumbnail,
-    movieId,
-    nameRU,
-    nameEn,
-    owner,
-  })
-    .then((card) => {
-      res.send({ data: card });
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new ValidationError(err.message);
-      } if (err.code === 11000) {
-        throw new MongoError('Такой фильм уже существует в Вашем списке.');
+  Movie.findOne({ movieId: `${movieId}`, owner: `${owner}` })
+    .then((data) => {
+      if (data === null) {
+        Movie.create({
+          country,
+          director,
+          duration,
+          year,
+          description,
+          image,
+          trailer,
+          thumbnail,
+          movieId,
+          nameRU,
+          nameEN,
+          owner,
+        })
+          .then((movie) => {
+            const addedMovieInfo = movie;
+            addedMovieInfo.owner = undefined;
+            res.send({ data: addedMovieInfo });
+          })
+          .catch((err) => {
+            if (err.name === 'ValidationError') {
+              throw new ValidationError(err.message);
+            } else {
+              next(err);
+            }
+          })
+          .catch(next);
       } else {
-        next(err);
+        next(new ConflictError('Такой фильм уже содержится в Вашем списке'));
       }
     })
     .catch(next);
 };
 
 const deleteMovie = (req, res, next) => {
-  Movie.checkMovieOwner(req.user._id, req.params.movieId)
-    .then(() => {
-      Movie.find({})
-        .then((movies) => res.send({ data: movies }));
+  Movie.checkMovieOwnerAndDelete(req.user._id, req.params.movieId, next)
+    .then((movie) => {
+      res.send({ data: movie });
     })
     .catch((err) => {
-      if (err.message === 'NotFound') {
-        throw new NotFoundError('Карточка не найдена');
-      } else if (err.name === 'CastError') {
-        throw new CastError('Ошибка в ID');
-      } else if (err.message === 'NoRights') {
-        throw new NoRightsError('Нет прав');
-      } else {
-        next(err);
+      if (err.name === 'CastError') {
+        next(new CastError('Ошибка в ID'));
       }
-    })
-    .catch(next);
+      next(err);
+    });
 };
 
 module.exports = {
