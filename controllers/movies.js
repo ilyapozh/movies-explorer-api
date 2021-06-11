@@ -72,7 +72,7 @@ const deleteMovie = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new CastError('Ошибка в ID'));
+        next(new CastError('Введенный ID не подходит по длине'));
       }
       next(err);
     });

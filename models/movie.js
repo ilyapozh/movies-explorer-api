@@ -67,22 +67,23 @@ const movieSchema = mongoose.Schema({
   },
 });
 
-movieSchema.statics.checkMovieOwnerAndDelete = function (loggedUserId, movieId) {
-  return this.findById(movieId)
-    .then((movie) => {
-      if (!movie) {
-        return Promise.reject(new NotFoundError('Карточка не найдена'));
-      }
-      if (loggedUserId === String(movie.owner)) {
-        return this.findByIdAndRemove(String(movieId))
-          .then((deletedMovie) => {
-            const curMovie = deletedMovie;
-            curMovie.owner = undefined;
-            return curMovie;
-          });
-      }
-      return Promise.reject(new NoRightsError('У вас нет прав на удаление этой карточки'));
-    });
-};
+movieSchema
+  .statics.checkMovieOwnerAndDelete = function checkMovieOwnerAndDelete(loggedUserId, movieId) {
+    return this.findById(movieId)
+      .then((movie) => {
+        if (!movie) {
+          return Promise.reject(new NotFoundError('Карточка не найдена'));
+        }
+        if (loggedUserId === String(movie.owner)) {
+          return this.findByIdAndRemove(String(movieId))
+            .then((deletedMovie) => {
+              const curMovie = deletedMovie;
+              curMovie.owner = undefined;
+              return curMovie;
+            });
+        }
+        return Promise.reject(new NoRightsError('У вас нет прав на удаление этой карточки'));
+      });
+  };
 
 module.exports = mongoose.model('movie', movieSchema);

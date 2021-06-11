@@ -7,6 +7,7 @@ const { centralErrorHandle } = require('./middlewears/centralErrorHandle');
 const { requestLogger, errorLogger } = require('./middlewears/logger');
 
 const { PORT = 3000 } = process.env;
+
 const app = express();
 
 app.use(express.json());
@@ -28,6 +29,4 @@ app.use(errors());
 
 app.use(centralErrorHandle);
 
-app.listen(PORT, () => {
-  console.log(`App listening on port: ${PORT}`);
-});
+app.listen(PORT, () => {});

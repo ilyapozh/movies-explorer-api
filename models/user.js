@@ -17,7 +17,6 @@ const userSchema = mongoose.Schema({
     type: String,
     required: true,
     select: false,
-    minlength: 2,
   },
   name: {
     type: String,
@@ -27,7 +26,7 @@ const userSchema = mongoose.Schema({
   },
 });
 
-userSchema.statics.findUserByCredentials = function (email, password) {
+userSchema.statics.findUserByCredentials = function findUserByCredentials(email, password) {
   return this.findOne({ email }).select('+password') // this — это модель User
     .then((user) => {
       if (!user) {
@@ -43,10 +42,10 @@ userSchema.statics.findUserByCredentials = function (email, password) {
     });
 };
 
-userSchema.statics.getCurrentUserInfo = function (userId) { // can change to orFail the if statement
-  return this.findById(userId).select('+password') // this select doesn't work
+userSchema.statics.getCurrentUserInfo = function getCurrentUserInfo(userId) {
+  return this.findById(userId).select('+password')
     .then((user) => {
-      if (!user) {
+      if (!user) { // проверка на наличие пользователя в базе
         throw new TokenError('Такого пользователя не существует');
       } else {
         return user;

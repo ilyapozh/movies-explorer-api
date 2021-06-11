@@ -68,7 +68,6 @@ const getUserInfo = (req, res, next) => {
 
 const updateUserInfo = (req, res, next) => {
   const { name, email } = req.body;
-  //! Работает только если оба параметра новые
   User.findByIdAndUpdate(req.user._id, { email, name }, {
     new: true, // обработчик then получит на вход обновлённую запись
     runValidators: true, // данные будут валидированы перед изменением
