@@ -5,17 +5,9 @@ const ConflictError = require('../middlewears/errors/conflictError');
 
 const findAllMovies = (req, res, next) => {
   const owner = req.user._id;
-  Movie.find({ owner: `${owner}` })
+  Movie.find({ owner: `${owner}` }).select('-owner')
     .then((movies) => {
-      let catalogMovies = [];
-      if (movies.length !== 0) {
-        catalogMovies = movies.map((movie) => {
-          const curMovie = movie;
-          curMovie.owner = undefined;
-          return curMovie;
-        });
-      }
-      res.send({ data: catalogMovies });
+      res.send({ data: movies });
     })
     .catch((err) => next(err))
     .catch(next);
@@ -66,13 +58,13 @@ const createMovie = (req, res, next) => {
 };
 
 const deleteMovie = (req, res, next) => {
-  Movie.checkMovieOwnerAndDelete(req.user._id, req.params.movieId, next)
+  Movie.checkMovieOwnerAndDelete(req.user._id, req.params.movieId)
     .then((movie) => {
       res.send({ data: movie });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new CastError('Введенный ID не подходит по длине'));
+        throw new CastError('Введенный ID не подходит по длине');
       }
       next(err);
     });

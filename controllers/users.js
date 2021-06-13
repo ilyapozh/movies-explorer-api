@@ -78,9 +78,10 @@ const updateUserInfo = (req, res, next) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ValidationError(`В отправленных данных есть ошибка ${err.message}`));
-      } if (err.code === 11000 && err.name === 'MongoError') {
-        next(new MongoError('Пользователь с таким имейлом уже существует'));
+        throw new ValidationError(`В отправленных данных есть ошибка ${err.message}`);
+      }
+      if (err.code === 11000 && err.name === 'MongoError') {
+        throw new MongoError('Пользователь с таким имейлом уже существует');
       } else {
         next(err);
       }

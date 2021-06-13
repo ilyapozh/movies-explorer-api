@@ -8,7 +8,7 @@ const NotFoundError = require('../middlewears/errors/notFoundError');
 
 router.post('/signup', celebrate({
   body: Joi.object().keys({
-    name: Joi.string().required().min(2).max(10),
+    name: Joi.string().required(),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
@@ -17,7 +17,7 @@ router.post('/signup', celebrate({
 router.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().required().min(5),
+    password: Joi.string().required(),
   }),
 }), login);
 
