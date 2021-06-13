@@ -72,19 +72,16 @@ const updateUserInfo = (req, res, next) => {
     new: true, // обработчик then получит на вход обновлённую запись
     runValidators: true, // данные будут валидированы перед изменением
   })
-    .orFail(() => {
-      next(new NotFoundError('Ошибка в ID'));
-    })
+    .orFail(() => new NotFoundError('Ошибка в ID'))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new ValidationError(`В отправленных данных есть ошибка ${err.message}`);
+        return next(new ValidationError(`В отправленных данных есть ошибка ${err.message}`));
       }
       if (err.code === 11000 && err.name === 'MongoError') {
-        throw new MongoError('Пользователь с таким имейлом уже существует');
-      } else {
-        next(err);
+        return next(new MongoError('Пользователь с таким имейлом уже существует'));
       }
+      return next(err);
     });
 };
 
