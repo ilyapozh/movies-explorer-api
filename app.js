@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
 const { errors } = require('celebrate');
@@ -7,10 +8,12 @@ const router = require('./routes/index');
 const { centralErrorHandle } = require('./middlewears/centralErrorHandle');
 const { requestLogger, errorLogger } = require('./middlewears/logger');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3005 } = process.env;
 const { DB_ADRESS = 'mongodb://localhost:27017/filmdb' } = process.env;
 
 const app = express();
+
+app.use(cors());
 
 app.use(helmet());
 

@@ -19,7 +19,6 @@ const createMovie = (req, res, next) => {
     country, director, duration, year, description, image,
     trailer, thumbnail, movieId, nameRU, nameEN,
   } = req.body;
-
   Movie.findOne({ movieId: `${movieId}`, owner: `${owner}` })
     .then((data) => {
       if (data === null) {
